@@ -35,7 +35,7 @@ def save_tasks(tasks):
         json.dump(tasks, f, ensure_ascii=False, indent=2)
 
 
-tasks = load_tasks()
+
 
 
 async def send_reminder(chat_id, text):
@@ -111,4 +111,7 @@ async def list_tasks(message: types.Message):
 
 if __name__ == "__main__":
     scheduler.start()
+    restore_jobs()
     executor.start_polling(dp, skip_updates=True)
+
+
