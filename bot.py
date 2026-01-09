@@ -123,10 +123,9 @@ async def process_steps(message: Message):
             await message.answer("Неверный формат даты. Попробуй ещё раз.")
 
 
-async def main():
-    scheduler.start()
-    await dp.start_polling(bot)
-
-
 if __name__ == "__main__":
-    asyncio.run(main())
+    scheduler.start()
+    from aiogram import executor
+    executor.start_polling(dp, skip_updates=True)
+
+
