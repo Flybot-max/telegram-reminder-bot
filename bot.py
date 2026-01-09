@@ -20,8 +20,14 @@ scheduler = AsyncIOScheduler()
 def load_tasks():
     if not os.path.exists(TASKS_FILE):
         return []
-    with open(TASKS_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
+    try:
+        with open(TASKS_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            if isinstance(data, list):
+                return [t for t in data if isinstance(t, dict)]
+            return []
+    except Exception:
+        return []
 
 
 def save_tasks(tasks):
@@ -86,7 +92,10 @@ async def add_task(message: types.Message):
 
 @dp.message_handler(commands=["list"])
 async def list_tasks(message: types.Message):
-    user_tasks = [t for t in tasks if t["chat_id"] == message.chat.id]
+    user_tasks = [
+        t for t in tasks
+        if isinstance(t, dict) and t.get("chat_id") == message.chat.id
+    ]
 
     if not user_tasks:
         await message.answer("У тебя нет задач")
