@@ -3,7 +3,7 @@ import json
 import os
 from datetime import datetime
 
-from aiogram import Bot, Dispatcher, F
+from aiogram import Bot, Dispatcher
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
@@ -20,13 +20,13 @@ user_state = {}
 def load_tasks():
     if not os.path.exists(DATA_FILE):
         return {}
-    with open(DATA_FILE, "r", encoding="utf-8") as f:
+    with open(DATA_FILE, "r", encoding="utf-8") as :
         return json.load(f)
 
 
 def save_tasks(tasks):
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(tasks, f, ensure_ascii=False, indent=2)
+    with open(DATA_FILE, "w", encoding="utf-8") as :
+        json.dump(tasks, , ensure_ascii=False, indent=2)
 
 
 tasks = load_tasks()
@@ -43,7 +43,7 @@ def main_keyboard():
 
 
 async def remind(chat_id, text):
-    await bot.send_message(chat_id, f"⏰ Напоминание:\n{text}")
+    await bot.send_message(chat_id, "⏰ Напоминание:\n{text}")
 
 
 @dp.message(F.text == "/start")
@@ -58,13 +58,13 @@ async def start(message: Message):
     )
 
 
-@dp.message(F.text == "➕ Добавить задачу")
+@dp.message(.text == "➕ Добавить задачу")
 async def add_task_start(message: Message):
     user_state[message.chat.id] = {"step": "text"}
     await message.answer("Что нужно напомнить?")
 
 
-@dp.message(F.text == "📋 Список задач")
+@dp.message(.text == "📋 Список задач")
 async def list_tasks(message: Message):
     chat_id = str(message.chat.id)
     user_tasks = tasks.get(chat_id, [])
@@ -75,7 +75,7 @@ async def list_tasks(message: Message):
 
     text = ""
     for i, t in enumerate(user_tasks, 1):
-        text += f"{i}. {t['text']} — {t['time']}\n"
+        text += "{i}. {t['text']} — {t['time']}\n"
 
     await message.answer(text)
 
@@ -127,5 +127,6 @@ if __name__ == "__main__":
     scheduler.start()
     from aiogram import executor
     executor.start_polling(dp, skip_updates=True)
+
 
 
