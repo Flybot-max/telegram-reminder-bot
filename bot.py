@@ -6,6 +6,7 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.utils import executor
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
+# ================== НАСТРОЙКИ ==================
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 TASKS_FILE = "tasks.json"
 
@@ -16,7 +17,7 @@ bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher(bot)
 scheduler = AsyncIOScheduler()
 
-
+# ================== ХРАНЕНИЕ ==================
 def load_tasks():
     if not os.path.exists(TASKS_FILE):
         return []
@@ -29,19 +30,32 @@ def load_tasks():
     except Exception:
         return []
 
-
 def save_tasks(tasks):
     with open(TASKS_FILE, "w", encoding="utf-8") as f:
         json.dump(tasks, f, ensure_ascii=False, indent=2)
 
+tasks = load_tasks()
 
-
-
-
+# ================== НАПОМИНАНИЕ ==================
 async def send_reminder(chat_id, text):
     await bot.send_message(chat_id, f"⏰ Напоминание:\n{text}")
 
+# ================== ВОССТАНОВЛЕНИЕ ==================
+def restore_jobs():
+    for t in tasks:
+        try:
+            run_date = datetime.fromisoformat(t["time"])
+            if run_date > datetime.now():
+                scheduler.add_job(
+                    send_reminder,
+                    "date",
+                    run_date=run_date,
+                    args=[t["chat_id"], t["text"]],
+                )
+        except Exception:
+            pass
 
+# ================== КОМАНДЫ ==================
 @dp.message_handler(commands=["start"])
 async def start(message: types.Message):
     await message.answer(
@@ -52,7 +66,6 @@ async def start(message: types.Message):
         "Посмотреть задачи:\n"
         "/list"
     )
-
 
 @dp.message_handler(commands=["add"])
 async def add_task(message: types.Message):
@@ -84,11 +97,10 @@ async def add_task(message: types.Message):
 
     except Exception:
         await message.answer(
-            "Ошибка формата.\n"
+            "❌ Ошибка формата.\n"
             "Пример:\n"
             "/add Позвонить | 11.01.2026 10:00"
         )
-
 
 @dp.message_handler(commands=["list"])
 async def list_tasks(message: types.Message):
@@ -108,10 +120,8 @@ async def list_tasks(message: types.Message):
 
     await message.answer(text)
 
-
+# ================== ЗАПУСК ==================
 if __name__ == "__main__":
     scheduler.start()
     restore_jobs()
     executor.start_polling(dp, skip_updates=True)
-
-
